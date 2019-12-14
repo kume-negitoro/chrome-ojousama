@@ -1,0 +1,20 @@
+{
+    "name": "O-Josama Test",
+    "version": "0.0.1",
+    "manifest_version": 2,
+    "description": "O-Josama Chrome kakutyo.",
+    "content_scripts": [
+        {
+            "matches": [
+                "https://twitter.com/*"
+            ],
+            "js": [
+                "kuromoji.js",
+                "content.js"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        "dict/*.dat.gz"
+    ]
+}
