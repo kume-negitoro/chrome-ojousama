@@ -27,6 +27,7 @@ const renyou = (token) => {
     }
     if (token.conjugated_type === '五段・ラ行') {
         const basic = token.basic_form;
+        if(basic == 'する') return 'し'
         return (basic.slice(0, basic.length - 1) +
             String.fromCharCode(basic.slice(-1).charCodeAt(0) - 1));
     }
@@ -45,6 +46,7 @@ const renyou = (token) => {
         return basic.slice(0, basic.length - 1);
     }
     if (token.conjugated_type.indexOf('サ変') !== -1) {
+        console.log(token)
         return 'し';
     }
     if (token.conjugated_type === 'カ変・クル') {
@@ -71,16 +73,26 @@ class TokenReplacer {
         this.replacerPairs.push([feature, replacer]);
         return this;
     }
-    replaceToken(left, mid, right) {
+    replaceToken(left, mid, right, terminate) {
         for (const [f, r] of this.replacerPairs) {
             if (isMatchObject(f, mid)) {
-                return r(left, mid, right);
+                return r(left, mid, right, terminate);
             }
         }
         return mid;
     }
     replacedTokens(tokens) {
-        return tokens.map((token, i) => this.replaceToken(tokens[i - 1], token, tokens[i + 1])).flat();
+        const newTokens = []
+        for(let i = 0; i < tokens.length; i++){
+            let terminated = false;
+            const terminate = () => { terminated = true; }
+            const newToken = this.replaceToken(
+                tokens[i - 1], tokens[i], tokens[i + 1], terminate
+            )
+            newTokens.push(newToken)
+            if(terminated) break
+        }
+        return newTokens.flat()
     }
     replace(text) {
         return this.textize(this.replacedTokens(this.tokenize(text)));
@@ -143,30 +155,77 @@ new Promise(resolve => {
                 x.className += ' converted'
                 // x.textContent = x.textContent.replace('\n','ですわ！\n') + 'ですわ！'
 
-                // const replacer = new TokenReplacer(tokenizer)
-                // replacer
-                //     .register({
-                //         pos: '動詞'
-                //     }, (left, mid, right) => {
-                //         return [tokenizer.tokenize(renyou(tokenizer.tokenize(mid.basic_form)[0]))[0], ...tokenizer.tokenize('ますわ')]
-                //     })
-                // x.textContent = replacer.replace(x.textContent)
-                
-                const tokens = []
-                let verbAppeared = false
-                for(const token of tokenizer.tokenize(x.textContent)){
-                    if(token.pos === '動詞'){
-                        tokens.push(
-                            [tokenizer.tokenize(renyou(tokenizer.tokenize(token.basic_form)[0]))[0], ...tokenizer.tokenize('ますわ')]
+                const replacer = new TokenReplacer(tokenizer)
+                replacer
+                    .register({
+                        pos: '名詞',
+                        pos_detail_1: '接尾',
+                        pos_detail_2: '人名',
+                    }, (left, mid, right) => {
+                        return tokenizer.tokenize('さま')
+                    })
+                    .register({
+                        pos: '名詞',
+                        pos_detail_1: '接尾'
+                    }, (left, mid, right) => {
+                        return tokenizer.tokenize(
+                            mid.surface_form
+                                .replace(/さん|くん|ちゃん|君|様/, 'さま')
                         )
-                        verbAppeared = true
-                        break
-                    }
-                    tokens.push(token)
-                }
-                if(!verbAppeared) tokens.push(...tokenizer.tokenize('ですわ'))
+                    })
+                    .register({
+                        pos: '名詞',
+                        pos_detail_1: '代名詞'
+                    }, (left, mid, right) => {
+                        return tokenizer.tokenize(
+                            mid.surface_form
+                                .replace(/私|僕|あたし|わたし|ぼく|拙者|俺|おれ/, 'わたくし')
+                        )
+                    })
+                    .register({
+                        pos: '感動詞'
+                    }, (left, mid, right) => {
+                        return tokenizer.tokenize(
+                            mid.surface_form
+                                .replace(/すいません|すみません/, '恐れ入ります')
+                        )
+                    })
+                    .register({
+                        pos: '名詞'
+                    }, (left, mid, right) => {
+                        return tokenizer.tokenize(
+                            mid.surface_form
+                                .replace(/父|お父さん|パパ|父親|父さん|父上/, 'お父さま')
+                        )
+                    })
+                    .register({
+                        pos: '動詞'
+                    }, (left, mid, right, terminate) => {
+                        terminate()
+                        return [tokenizer.tokenize(renyou(tokenizer.tokenize(mid.basic_form)[0]))[0], ...tokenizer.tokenize('ますわ')]
+                    })
+                    .register({}, (left, mid, right) => {
+                        if(!right) return [mid, ...tokenizer.tokenize('ですわ')]
+                        return mid
+                    })
+                    
+                x.textContent = replacer.replace(x.textContent)
+                
+                // const tokens = []
+                // let verbAppeared = false
+                // for(const token of tokenizer.tokenize(x.textContent)){
+                //     if(token.pos === '動詞'){
+                //         tokens.push(
+                //             [tokenizer.tokenize(renyou(tokenizer.tokenize(token.basic_form)[0]))[0], ...tokenizer.tokenize('ますわ')]
+                //         )
+                //         verbAppeared = true
+                //         break
+                //     }
+                //     tokens.push(token)
+                // }
+                // if(!verbAppeared) tokens.push(...tokenizer.tokenize('ですわ'))
 
-                x.textContent = tokens.flat().reduce((text, token) => text + token.surface_form, '');
+                // x.textContent = tokens.flat().reduce((text, token) => text + token.surface_form, '');
                 
             })
         }
