@@ -83,19 +83,22 @@ class TokenReplacer {
     }
     replacedTokens(tokens) {
         const newTokens = []
+        let verbAppeared = false
         for(let i = 0; i < tokens.length; i++){
             let terminated = false;
             const terminate = () => { terminated = true; }
+            if(tokens[i].pos === '動詞') verbAppeared = true
             const newToken = this.replaceToken(
                 tokens[i - 1], tokens[i], tokens[i + 1], terminate
             )
             newTokens.push(newToken)
             if(terminated) break
         }
-        return newTokens.flat()
+        return [newTokens.flat(), verbAppeared]
     }
     replace(text) {
-        return this.textize(this.replacedTokens(this.tokenize(text)));
+        const [tokens, verbAppeared] = this.replacedTokens(this.tokenize(text))
+        return [this.textize(tokens), verbAppeared];
     }
 }
 
@@ -246,7 +249,8 @@ new Promise(resolve => {
                         return mid
                     })
                     
-                x.textContent = replacer.replace(x.textContent)
+                 const [text, verbAppeared] = replacer.replace(x.textContent)
+                 x.textContent = verbAppeared ? text : text + 'ですわ'
                 
                 // const tokens = []
                 // let verbAppeared = false
