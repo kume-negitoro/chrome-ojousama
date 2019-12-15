@@ -118,15 +118,36 @@ new Promise(resolve => {
                             + '</div>'
                             + '</div>'
                             + '</div>'
-                e.onclick = function() {
-                    Convert_Text(this)
-                }
+                e.addEventListener('click', () => {
+                    Convert_Text(e)
+                    const svg = e.querySelector('svg:Not(.converted)')
+                    if(svg != null){
+                        const buf = svg.parentNode
+                        buf.innerHTML = '<div class="css-1dbjc4n r-sdzlij r-1p0dtai r-xoduu5 r-1d2f490 r-xf4iuw r-u8s1d r-zchlnj r-ipm5af r-o7ynqc r-6416eg withSVG">'
+                                    + '</div>'
+                                    + '<svg viewBox="0 0 287 287" class="r-4qtqp9 r-yyyyoo r-1xvli5t r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1hdv0qi converted" style=color:rgb( 220, 220, 0 )>'
+                                    + '<g>'
+                                    + '<path d="M153,215h74.86L249,132.41c-52.93,35-82.83,13.82-96-48.32-13.17,62.14-43.07,83.36-96,48.32L78.14,215Z" />'
+                                    + '<path d="M231.74,220H74.26L48.94,121.08l10.82,7.16C82,143,100.33,147.57,114.2,141.9c15.58-6.38,27-26.18,33.91-58.85L153,60l4.89,23.08c6.92,32.67,18.33,52.47,33.91,58.85,13.87,5.67,32.18,1.08,54.44-13.66l10.82-7.16ZM82,210H224l17.14-66.95c-20.63,11.37-38.46,14.1-53.11,8.1-15.54-6.36-27.07-21.84-35-47.12-7.94,25.28-19.47,40.76-35,47.12-14.65,6-32.48,3.27-53.11-8.1Z" />'
+                                    //+ '<circle cx="20.5" cy="84.5" r="15.5"/>'
+                                    + '<path d="M40.5,119A20.5,20.5,0,1,1,61,98.5,20.53,20.53,0,0,1,40.5,119Zm0-31A10.5,10.5,0,1,0,51,98.5,10.51,10.51,0,0,0,40.5,88Z" />'
+                                    //+ '<circle cx="245.5" cy="84.5" r="15.5"/>'
+                                    + '<path d="M265.5,119A20.5,20.5,0,1,1,286,98.5,20.53,20.53,0,0,1,265.5,119Zm0-31A10.5,10.5,0,1,0,276,98.5,10.51,10.51,0,0,0,265.5,88Z" />'
+                                    //+ '<circle cx="132.5" cy="20.5" r="15.5"/>'
+                                    + '<path d="M152.5,55A20.5,20.5,0,1,1,173,34.5,20.53,20.53,0,0,1,152.5,55Zm0-31A10.5,10.5,0,1,0,163,34.5,10.51,10.51,0,0,0,152.5,24Z" />'
+                                    + '</g>'
+                                    + '</svg>'
+                    }
+                })
                 e.addEventListener('mouseenter', () => {
-                　　e.querySelector('svg').style.color = 'rgb( 220, 220, 0 )'
+                    e.querySelector('svg').style.color = 'rgb( 220, 220, 0 )'
                     e.querySelector('.withSVG').style.backgroundColor = 'rgba( 220, 220, 0 , 0.1)'
                 }, false);
                 e.addEventListener('mouseleave', () => {
-                    e.querySelector('svg').style.color = 'gray'
+                    const buf = e.querySelector('svg:Not(.converted)')
+                    if(buf != null){
+                        buf.style.color = 'gray'
+                    }
                     e.querySelector('.withSVG').style.backgroundColor = 'rgba( 0, 0, 0 , 0)'
                 }, false);
                 x.insertBefore(e, x.lastChild)
@@ -138,6 +159,22 @@ new Promise(resolve => {
         
         function Convert_Text(button){
             const name = '.' + button.parentNode.parentNode.className.split(' ').pop()
+            const tweetName = document.querySelector('div[data-testid=tweet]>div+div' + name + '>div>div>div>a>div>div>div>span>span:Not(.converted)')
+            if(tweetName != null){
+                tweetName.className += ' converted'
+                tweetName.textContent += 'お嬢様'
+            }
+            const buf = document.querySelector('div[data-testid=tweet]>div+div' + name)
+            const tweetIcon = buf.parentNode.querySelector('div>div>div>a>div>div+div>div>img:Not(.converted)')
+            const tweetIconDiv = buf.parentNode.querySelector('div>div>div>a>div>div+div>div>div:Not(.converted)')
+            if(tweetIcon != null){
+                tweetIcon.className += ' converted'
+                tweetIconDiv.className += ' converted'
+                tweetIcon.setAttribute('src', chrome.extension.getURL('images/-RNNhhqF_400x400.jpg'))
+                tweetIconDiv.style.backgroundImage = 'url(' + chrome.extension.getURL('images/-RNNhhqF_400x400.jpg') + ')'
+            }
+            
+            
             const elements = [...document.querySelectorAll('div[data-testid=tweet]>div+div' + name + '>div+div>span:Not(.converted)')]
             elements.forEach(x => {
                 x.className += ' converted'
