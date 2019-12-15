@@ -149,6 +149,7 @@ new Promise(resolve => {
                                     + '<path d="M152.5,55A20.5,20.5,0,1,1,173,34.5,20.53,20.53,0,0,1,152.5,55Zm0-31A10.5,10.5,0,1,0,163,34.5,10.51,10.51,0,0,0,152.5,24Z" />'
                                     + '</g>'
                                     + '</svg>'
+                        buf.querySelector('svg').style.color = 'rgb( 220, 220, 0 )'
                     }
                 })
                 e.addEventListener('mouseenter', () => {
